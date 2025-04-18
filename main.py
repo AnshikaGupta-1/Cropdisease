@@ -17,6 +17,7 @@ import requests
 
 app = FastAPI()
 
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Download and load model from Hugging Face (only once)
 MODEL_PATH = "newPlant.h5"
 MODEL_URL = "https://huggingface.co/Dev1ng/cd/resolve/main/newPlant.h5"
 
@@ -34,8 +36,10 @@ if not os.path.exists(MODEL_PATH):
     with open(MODEL_PATH, "wb") as f:
         f.write(r.content)
 
+print("Loading model...")
 MODEL = tf.keras.models.load_model(MODEL_PATH)
 
+# Class labels
 CLASS_NAMES = ['AppleApple_scab', 'AppleBlack_rot', 'AppleCedar_apple_rust', 'Applehealthy', 'Blueberryhealthy',
     'Cherry_(including_sour)Powdery_mildew', 'Cherry_(including_sour)healthy', 'Corn_(maize)Cercospora_leaf_spot Gray_leaf_spot',
     'Corn_(maize)Common_rust', 'Corn(maize)Northern_Leaf_Blight', 'Corn_(maize)healthy', 'GrapeBlack_rot',
@@ -46,6 +50,7 @@ CLASS_NAMES = ['AppleApple_scab', 'AppleBlack_rot', 'AppleCedar_apple_rust', 'Ap
     'TomatoLeaf_Mold', 'TomatoSeptoria_leaf_spot', 'TomatoSpider_mites Two-spotted_spider_mite', 'TomatoTarget_Spot',
     'TomatoTomato_Yellow_Leaf_Curl_Virus', 'TomatoTomato_mosaic_virus', 'Tomatohealthy']
 
+# Prediction endpoint
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     try:
@@ -68,3 +73,4 @@ async def predict(file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
